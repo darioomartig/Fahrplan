@@ -3,313 +3,397 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fahrplan Liebefeld ↔ Bern</title>
+  <title>Fahrplan</title>
   <style>
+    :root {
+      --bg:      #f5f5f5;
+      --surface: #ffffff;
+      --text:    #0a0a0a;
+      --sub:     #6b6b6b;
+      --faint:   #e8e8e8;
+      --accent:  #0051a2;
+      --red:     #c8000a;
+      --amber:   #b45309;
+      --green:   #166534;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f8f9fa;
-      color: #1a1a1a;
-      min-height: 100vh;
+    html, body {
+      height: 100%;
     }
 
-    /* ── Header ──────────────────────────────── */
-    header {
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
     }
-    .header-inner {
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 12px 16px;
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--faint);
+      flex-shrink: 0;
+    }
+
+    .header-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      padding: 16px 24px 12px;
+      gap: 16px;
     }
+
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
       min-width: 0;
     }
-    .brand-logo {
-      height: 32px;
+
+    #brand-logo {
+      height: 28px;
       width: auto;
       object-fit: contain;
-      flex-shrink: 0;
+      display: none;
     }
-    .brand-icon {
-      font-size: 26px;
+
+    #brand-icon {
+      font-size: 28px;
       line-height: 1;
-      flex-shrink: 0;
+      display: none;
     }
-    .brand-text h1 {
-      font-size: 15px;
-      font-weight: 700;
-      color: #111;
-      line-height: 1.1;
-    }
-    .brand-text p {
+
+    .brand-label {
       font-size: 11px;
-      color: #6b7280;
-      margin-top: 1px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--sub);
     }
-    .header-meta {
+
+    .header-right {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       flex-shrink: 0;
     }
-    .last-update {
-      font-size: 11px;
-      color: #9ca3af;
+
+    #last-update {
+      font-size: 12px;
+      color: var(--sub);
+      font-variant-numeric: tabular-nums;
     }
-    .loading-dot {
-      width: 6px;
-      height: 6px;
-      background: #3b82f6;
+
+    #loading-dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      animation: pulse 1s ease-in-out infinite;
+      background: var(--accent);
+      display: none;
+      animation: blink 1s ease-in-out infinite;
     }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
     .btn-refresh {
       background: none;
       border: none;
       cursor: pointer;
-      color: #9ca3af;
-      padding: 4px;
-      border-radius: 6px;
+      color: var(--sub);
+      padding: 6px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
-      transition: color .15s;
+      transition: color .15s, background .15s;
     }
-    .btn-refresh:hover { color: #3b82f6; }
-    .btn-refresh svg { width: 16px; height: 16px; }
 
-    /* ── Tabs ────────────────────────────────── */
-    .tabs {
-      max-width: 520px;
-      margin: 0 auto;
-      display: flex;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 0 16px;
+    .btn-refresh:hover {
+      color: var(--accent);
+      background: #f0f4ff;
     }
+
+    .btn-refresh svg { width: 15px; height: 15px; }
+
+    /* ── Tabs ───────────────────────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      padding: 0 24px;
+      gap: 0;
+    }
+
     .tab {
-      padding: 8px 14px;
+      padding: 10px 20px;
       font-size: 13px;
       font-weight: 500;
-      color: #6b7280;
+      color: var(--sub);
       background: none;
       border: none;
       border-bottom: 2px solid transparent;
       margin-bottom: -1px;
       cursor: pointer;
+      letter-spacing: .01em;
       transition: color .15s, border-color .15s;
-      white-space: nowrap;
     }
+
     .tab.active {
-      color: #2563eb;
-      border-bottom-color: #2563eb;
+      color: var(--accent);
+      border-bottom-color: var(--accent);
     }
 
-    /* ── Main ────────────────────────────────── */
+    /* ── Main grid ──────────────────────────────────────────────────── */
     main {
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 14px 14px 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    /* ── Route card ──────────────────────────── */
-    .route-card {
-      background: #fff;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--faint);
       overflow: hidden;
     }
-    .route-header {
-      background: #f9fafb;
-      border-bottom: 1px solid #f0f0f0;
-      padding: 8px 14px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #6b7280;
-      letter-spacing: .04em;
-      text-transform: uppercase;
+
+    /* mobile: stack */
+    @media (max-width: 600px) {
+      main {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+        background: var(--bg);
+        gap: 12px;
+        padding: 12px;
+      }
     }
 
-    /* ── Connection rows ─────────────────────── */
-    .conn-list {
-      divide-y: 1px solid #f3f4f6;
-    }
-    .conn-row {
-      padding: 12px 14px;
-      border-bottom: 1px solid #f3f4f6;
-    }
-    .conn-row:last-child { border-bottom: none; }
-    .conn-top {
+    /* ── Route panel ────────────────────────────────────────────────── */
+    .route-panel {
+      background: var(--surface);
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    @media (max-width: 600px) {
+      .route-panel {
+        border-radius: 12px;
+        border: 1px solid var(--faint);
+      }
+    }
+
+    .route-title {
+      padding: 18px 28px 12px;
+      border-bottom: 1px solid var(--faint);
+    }
+
+    .route-from {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: .01em;
+    }
+
+    .route-to {
+      font-size: 13px;
+      color: var(--sub);
+      margin-top: 2px;
+    }
+
+    .route-to::before {
+      content: '→  ';
+      color: var(--faint);
+      font-size: 11px;
+    }
+
+    /* ── Connection rows ────────────────────────────────────────────── */
+    .conn-list {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .conn-row {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--faint);
+      min-height: 0;
+    }
+
+    .conn-row:last-child { border-bottom: none; }
+
+    .conn-main {
+      display: flex;
+      align-items: baseline;
       justify-content: space-between;
+      gap: 12px;
+    }
+
+    .times {
+      display: flex;
+      align-items: baseline;
       gap: 8px;
     }
-    .conn-times {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .dep-time {
-      font-size: 18px;
-      font-weight: 700;
+
+    .dep {
+      font-size: 26px;
+      font-weight: 300;
       font-variant-numeric: tabular-nums;
-      color: #111;
-      letter-spacing: -.3px;
+      letter-spacing: -.5px;
+      color: var(--text);
+      line-height: 1;
     }
-    .delay-badge {
-      font-size: 11px;
-      font-weight: 600;
-      color: #dc2626;
+
+    .dep.delayed {
+      text-decoration: line-through;
+      color: var(--sub);
+      font-size: 20px;
     }
-    .arrow {
-      color: #d1d5db;
-      font-size: 13px;
-    }
-    .arr-time {
-      font-size: 18px;
-      font-weight: 600;
+
+    .dep-actual {
+      font-size: 26px;
+      font-weight: 300;
       font-variant-numeric: tabular-nums;
-      color: #6b7280;
-      letter-spacing: -.3px;
+      letter-spacing: -.5px;
+      color: var(--red);
+      line-height: 1;
     }
+
+    .sep {
+      font-size: 14px;
+      color: var(--faint);
+      font-weight: 300;
+    }
+
+    .arr {
+      font-size: 20px;
+      font-weight: 300;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.3px;
+      color: var(--sub);
+      line-height: 1;
+    }
+
     .countdown {
       font-size: 13px;
       font-weight: 600;
+      letter-spacing: .01em;
       flex-shrink: 0;
+      line-height: 1;
     }
-    .countdown.now    { color: #dc2626; font-size: 14px; }
-    .countdown.soon   { color: #d97706; }
-    .countdown.normal { color: #16a34a; }
-    .countdown.future { color: #6b7280; font-weight: 500; }
 
-    .conn-meta {
-      margin-top: 5px;
+    .countdown.now    { color: var(--red); font-size: 15px; }
+    .countdown.soon   { color: var(--amber); }
+    .countdown.normal { color: var(--green); }
+    .countdown.future { color: var(--sub); font-weight: 400; }
+
+    .conn-sub {
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
     }
-    .line-badge {
-      background: #dbeafe;
-      color: #1d4ed8;
+
+    .line-pill {
       font-size: 11px;
-      font-weight: 600;
-      padding: 2px 7px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      background: #e8f0fd;
+      color: var(--accent);
+      padding: 2px 8px;
       border-radius: 20px;
     }
-    .duration {
+
+    .dur {
       font-size: 12px;
-      color: #9ca3af;
-    }
-    .delay-info {
-      font-size: 12px;
-      color: #dc2626;
+      color: var(--sub);
     }
 
-    /* ── Skeleton ────────────────────────────── */
-    .skeleton { animation: shimmer 1.2s infinite; }
-    @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:.45} }
-    .skel-line {
-      background: #e5e7eb;
+    .delay-tag {
+      font-size: 12px;
+      color: var(--red);
+    }
+
+    /* ── Skeleton ───────────────────────────────────────────────────── */
+    .skel {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: sweep 1.4s infinite;
       border-radius: 4px;
-      height: 14px;
+      height: 24px;
     }
 
-    /* ── Error ───────────────────────────────── */
-    .error-box {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 10px;
-      padding: 12px 16px;
+    @keyframes sweep {
+      0%   { background-position: 200% 0 }
+      100% { background-position: -200% 0 }
+    }
+
+    .skel-sm { height: 12px; margin-top: 8px; width: 80px; }
+
+    /* ── Error ──────────────────────────────────────────────────────── */
+    .error-msg {
+      padding: 28px;
       font-size: 13px;
-      color: #b91c1c;
-    }
-
-    /* ── Footer ──────────────────────────────── */
-    footer {
-      text-align: center;
-      font-size: 11px;
-      color: #d1d5db;
-      padding: 8px 16px 24px;
+      color: var(--red);
     }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="header-inner">
+  <div class="header-row">
     <div class="brand">
-      <!-- Logo swaps with tab -->
-      <img id="brand-logo" class="brand-logo" src="" alt="Kellerhals Carrard" style="display:none">
-      <span id="brand-icon" class="brand-icon" style="display:none">🏠</span>
-      <div class="brand-text">
-        <h1>Fahrplan</h1>
-        <p>Liebefeld ↔ Bern</p>
-      </div>
+      <img id="brand-logo" alt="Kellerhals Carrard"
+           src="https://raw.githubusercontent.com/darioomartig/Kc/main/kc%20lange.jpg">
+      <span id="brand-icon">🏠</span>
+      <span class="brand-label">Fahrplan</span>
     </div>
-    <div class="header-meta">
-      <div id="loading-dot" class="loading-dot" style="display:none"></div>
-      <span id="last-update" class="last-update"></span>
-      <button class="btn-refresh" onclick="refresh()" title="Aktualisieren">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+    <div class="header-right">
+      <div id="loading-dot"></div>
+      <span id="last-update"></span>
+      <button class="btn-refresh" onclick="doRefresh()" title="Aktualisieren">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9
+               m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
         </svg>
       </button>
     </div>
   </div>
-  <div class="tabs">
-    <button class="tab active" id="tab-arbeit" onclick="setTab('arbeit')">🏢 Zur Arbeit</button>
-    <button class="tab"        id="tab-heim"   onclick="setTab('heim')">🏠 Nach Hause</button>
+
+  <div class="tab-bar">
+    <button class="tab active" id="tab-arbeit" onclick="setTab('arbeit')">Zur Arbeit</button>
+    <button class="tab"        id="tab-heim"   onclick="setTab('heim')">Nach Hause</button>
   </div>
 </header>
 
 <main id="main"></main>
 
-<footer>Automatische Aktualisierung alle 60 s · transport.opendata.ch</footer>
-
 <script>
-const KC_LOGO = 'https://raw.githubusercontent.com/darioomartig/Kc/main/kc%20lange.jpg';
-const API     = 'https://transport.opendata.ch/v1/connections';
+const API = 'https://transport.opendata.ch/v1/connections';
+const KC  = 'https://raw.githubusercontent.com/darioomartig/Kc/main/kc%20lange.jpg';
 
 const ROUTES = {
   arbeit: [
-    { label: 'Liebefeld Park → Monbijou',   from: 'Liebefeld, Liebefeld Park', to: 'Bern, Monbijou' },
-    { label: 'Neuhausplatz → Kocherpark',    from: 'Liebefeld, Neuhausplatz',   to: 'Bern, Kocherpark' },
+    { from: 'Liebefeld, Liebefeld Park', to: 'Bern, Monbijou' },
+    { from: 'Liebefeld, Neuhausplatz',   to: 'Bern, Kocherpark' },
   ],
   heim: [
-    { label: 'Hirschengraben → Neuhausplatz', from: 'Bern, Hirschengraben',     to: 'Liebefeld, Neuhausplatz' },
-    { label: 'Monbijou → Liebefeld Park',      from: 'Bern, Monbijou',           to: 'Liebefeld, Liebefeld Park' },
+    { from: 'Bern, Hirschengraben',     to: 'Liebefeld, Neuhausplatz' },
+    { from: 'Bern, Monbijou',           to: 'Liebefeld, Liebefeld Park' },
   ],
 };
 
-let activeTab    = 'arbeit';
-let cachedData   = { arbeit: null, heim: null };
-let clockTimer   = null;
-let refreshTimer = null;
+let tab    = 'arbeit';
+let cache  = { arbeit: null, heim: null };
+let nowMs  = Date.now();
 
-// ── Brand swap ───────────────────────────────────────────────────────────────
-function updateBrand(tab) {
+// ── Brand ──────────────────────────────────────────────────────────────────
+function applyBrand(t) {
   const logo = document.getElementById('brand-logo');
   const icon = document.getElementById('brand-icon');
-  if (tab === 'arbeit') {
-    logo.src = KC_LOGO;
+  if (t === 'arbeit') {
     logo.style.display = 'block';
     icon.style.display = 'none';
   } else {
@@ -318,163 +402,161 @@ function updateBrand(tab) {
   }
 }
 
-// ── Tab switching ─────────────────────────────────────────────────────────────
-function setTab(tab) {
-  activeTab = tab;
-  document.getElementById('tab-arbeit').classList.toggle('active', tab === 'arbeit');
-  document.getElementById('tab-heim').classList.toggle('active', tab === 'heim');
-  updateBrand(tab);
-  if (cachedData[tab]) {
-    render(cachedData[tab]);
-  } else {
-    renderSkeleton();
-    refresh();
-  }
+// ── Tab ────────────────────────────────────────────────────────────────────
+function setTab(t) {
+  tab = t;
+  document.getElementById('tab-arbeit').classList.toggle('active', t === 'arbeit');
+  document.getElementById('tab-heim').classList.toggle('active', t === 'heim');
+  applyBrand(t);
+  cache[t] ? render(cache[t]) : (skeleton(), doRefresh());
 }
 
-// ── API ───────────────────────────────────────────────────────────────────────
+// ── Fetch ──────────────────────────────────────────────────────────────────
 async function fetchRoute(from, to) {
-  const url = `${API}?${new URLSearchParams({ from, to, limit: 4 })}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = await res.json();
-  return json.connections || [];
+  const r = await fetch(`${API}?${new URLSearchParams({ from, to, limit: 4 })}`);
+  if (!r.ok) throw new Error(r.status);
+  return (await r.json()).connections || [];
 }
 
-async function refresh() {
-  setLoading(true);
+async function doRefresh() {
+  loading(true);
   try {
-    const routes  = ROUTES[activeTab];
-    const results = await Promise.all(routes.map(r => fetchRoute(r.from, r.to)));
-    cachedData[activeTab] = results;
-    render(results);
-    const now = new Date();
+    cache[tab] = await Promise.all(ROUTES[tab].map(r => fetchRoute(r.from, r.to)));
+    render(cache[tab]);
     document.getElementById('last-update').textContent =
-      now.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' });
-  } catch (e) {
+      new Date().toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' });
+  } catch {
     document.getElementById('main').innerHTML =
-      `<div class="error-box">Verbindungen konnten nicht geladen werden.</div>`;
-  } finally {
-    setLoading(false);
+      ROUTES[tab].map(() =>
+        `<div class="route-panel"><div class="error-msg">Fehler beim Laden.</div></div>`
+      ).join('');
   }
+  loading(false);
 }
 
-function setLoading(on) {
+function loading(on) {
   document.getElementById('loading-dot').style.display = on ? 'block' : 'none';
 }
 
-// ── Time helpers ──────────────────────────────────────────────────────────────
-function fmtTime(iso) {
-  if (!iso) return '--:--';
-  return new Date(iso).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' });
+// ── Time helpers ───────────────────────────────────────────────────────────
+const fmt = iso => iso
+  ? new Date(iso).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' })
+  : '--:--';
+
+const effDep = c => c.from?.prognosis?.departure || c.from?.departure;
+
+function minsUntil(iso) {
+  return iso ? Math.round((new Date(iso) - nowMs) / 60000) : null;
 }
 
-function effectiveDep(conn) {
-  return conn.from?.prognosis?.departure || conn.from?.departure;
+function countdownHtml(c) {
+  const m = minsUntil(effDep(c));
+  if (m === null) return '';
+  if (m <= 0)  return `<span class="countdown now">Jetzt</span>`;
+  if (m <= 2)  return `<span class="countdown now">in ${m}&thinsp;min</span>`;
+  if (m <= 7)  return `<span class="countdown soon">in ${m}&thinsp;min</span>`;
+  if (m <= 20) return `<span class="countdown normal">in ${m}&thinsp;min</span>`;
+  return `<span class="countdown future">in ${m}&thinsp;min</span>`;
 }
 
-function minutesUntil(iso) {
-  if (!iso) return null;
-  return Math.round((new Date(iso) - Date.now()) / 60000);
+function parseDur(d) {
+  if (!d) return '';
+  const m = d.match(/(\d+)d(\d+):(\d+):/);
+  if (!m) return d;
+  const tot = +m[1]*1440 + +m[2]*60 + +m[3];
+  return tot < 60 ? `${tot} min` : `${Math.floor(tot/60)} h ${tot%60 ? tot%60+' min' : ''}`;
 }
 
-function countdownHtml(conn) {
-  const min = minutesUntil(effectiveDep(conn));
-  if (min === null) return '';
-  if (min <= 0)  return `<span class="countdown now">Jetzt</span>`;
-  if (min <= 2)  return `<span class="countdown now">in ${min} min</span>`;
-  if (min <= 6)  return `<span class="countdown soon">in ${min} min</span>`;
-  if (min <= 15) return `<span class="countdown normal">in ${min} min</span>`;
-  return `<span class="countdown future">in ${min} min</span>`;
+function delayMin(c) {
+  const d = c.from?.delay;
+  return d ? (d >= 60 ? Math.round(d/60) : d) : 0;
 }
 
-function parseDuration(dur) {
-  if (!dur) return '';
-  const m = dur.match(/(\d+)d(\d+):(\d+):/);
-  if (!m) return dur;
-  const total = +m[1] * 1440 + +m[2] * 60 + +m[3];
-  if (total < 60) return `${total} min`;
-  const h = Math.floor(total / 60), r = total % 60;
-  return r ? `${h} h ${r} min` : `${h} h`;
+// ── Render ─────────────────────────────────────────────────────────────────
+function routeLabel(r) {
+  const short = s => s.replace('Liebefeld, ', '').replace('Bern, ', '');
+  return { from: short(r.from), to: short(r.to) };
 }
 
-function delayMin(conn) {
-  const d = conn.from?.delay;
-  if (!d) return 0;
-  return d >= 60 ? Math.round(d / 60) : d;
-}
+function connHtml(c) {
+  const delay    = delayMin(c);
+  const depSched = fmt(c.from?.departure);
+  const depReal  = delay > 0 ? fmt(effDep(c)) : null;
+  const arr      = fmt(c.to?.arrival);
+  const line     = (c.products || [])[0] || '';
+  const dur      = parseDur(c.duration);
 
-// ── Render ────────────────────────────────────────────────────────────────────
-function renderSkeleton() {
-  const routes = ROUTES[activeTab];
-  document.getElementById('main').innerHTML = routes.map(r => `
-    <div class="route-card">
-      <div class="route-header">${r.label}</div>
-      ${[0,0,0,0].map(() => `
-        <div class="conn-row skeleton">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div class="skel-line" style="width:120px"></div>
-            <div class="skel-line" style="width:60px"></div>
-          </div>
-          <div class="skel-line" style="width:80px;margin-top:8px;height:10px"></div>
-        </div>`).join('')}
-    </div>`).join('');
+  const depHtml = depReal
+    ? `<span class="dep delayed">${depSched}</span>
+       <span class="dep-actual">${depReal}</span>`
+    : `<span class="dep">${depSched}</span>`;
+
+  return `
+    <div class="conn-row">
+      <div class="conn-main">
+        <div class="times">
+          ${depHtml}
+          <span class="sep">→</span>
+          <span class="arr">${arr}</span>
+        </div>
+        ${countdownHtml(c)}
+      </div>
+      <div class="conn-sub">
+        ${line ? `<span class="line-pill">${line}</span>` : ''}
+        <span class="dur">${dur}</span>
+        ${delay > 0 ? `<span class="delay-tag">+${delay} min</span>` : ''}
+      </div>
+    </div>`;
 }
 
 function render(data) {
-  const routes = ROUTES[activeTab];
-  document.getElementById('main').innerHTML = routes.map((r, i) => {
-    const conns = data[i] || [];
-    const rows = conns.length
-      ? conns.map(conn => {
-          const delay   = delayMin(conn);
-          const depIso  = conn.from?.departure;
-          const arrIso  = conn.to?.arrival;
-          const line    = (conn.products || [])[0] || '';
-          const dur     = parseDuration(conn.duration);
-          const depStr  = fmtTime(depIso);
-          const arrStr  = fmtTime(arrIso);
-          const delayBadge  = delay > 0 ? `<span class="delay-badge">+${delay}'</span>` : '';
-          const delayInfo   = delay > 0 ? `<span class="delay-info">${delay} min Verspätung</span>` : '';
-          const lineBadge   = line ? `<span class="line-badge">${line}</span>` : '';
-          return `
-            <div class="conn-row">
-              <div class="conn-top">
-                <div class="conn-times">
-                  <span class="dep-time">${depStr}</span>${delayBadge}
-                  <span class="arrow">→</span>
-                  <span class="arr-time">${arrStr}</span>
-                </div>
-                ${countdownHtml(conn)}
-              </div>
-              <div class="conn-meta">
-                ${lineBadge}
-                <span class="duration">${dur}</span>
-                ${delayInfo}
-              </div>
-            </div>`;
-        }).join('')
-      : `<div class="conn-row" style="color:#9ca3af;font-size:13px;text-align:center">Keine Verbindungen gefunden</div>`;
-
+  document.getElementById('main').innerHTML = ROUTES[tab].map((r, i) => {
+    const lbl  = routeLabel(r);
+    const rows = (data[i] || []).map(connHtml).join('') ||
+      `<div class="conn-row"><span style="color:var(--sub);font-size:13px">Keine Verbindungen</span></div>`;
     return `
-      <div class="route-card">
-        <div class="route-header">${r.label}</div>
-        ${rows}
+      <div class="route-panel">
+        <div class="route-title">
+          <div class="route-from">${lbl.from}</div>
+          <div class="route-to">${lbl.to}</div>
+        </div>
+        <div class="conn-list">${rows}</div>
       </div>`;
   }).join('');
 }
 
-// ── Clock tick (keeps countdowns live) ───────────────────────────────────────
-function tick() {
-  if (cachedData[activeTab]) render(cachedData[activeTab]);
+function skeleton() {
+  document.getElementById('main').innerHTML = ROUTES[tab].map((r) => {
+    const lbl = routeLabel(r);
+    return `
+      <div class="route-panel">
+        <div class="route-title">
+          <div class="route-from">${lbl.from}</div>
+          <div class="route-to">${lbl.to}</div>
+        </div>
+        <div class="conn-list">
+          ${[0,0,0,0].map(() => `
+            <div class="conn-row">
+              <div class="skel" style="width:180px"></div>
+              <div class="skel skel-sm"></div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
-updateBrand('arbeit');
-renderSkeleton();
-refresh();
-clockTimer   = setInterval(tick,    1_000);
-refreshTimer = setInterval(refresh, 60_000);
+// ── Clock ──────────────────────────────────────────────────────────────────
+setInterval(() => {
+  nowMs = Date.now();
+  if (cache[tab]) render(cache[tab]);
+}, 1000);
+
+setInterval(doRefresh, 60_000);
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+applyBrand('arbeit');
+skeleton();
+doRefresh();
 </script>
 </body>
 </html>
