@@ -6,22 +6,20 @@
   <title>Fahrplan</title>
   <style>
     :root {
-      --bg:      #f5f5f5;
+      --bg:      #e8edf2;
       --surface: #ffffff;
-      --text:    #0a0a0a;
-      --sub:     #6b6b6b;
-      --faint:   #e8e8e8;
-      --accent:  #0051a2;
-      --red:     #c8000a;
-      --amber:   #b45309;
-      --green:   #166534;
+      --text:    #1e293b;
+      --sub:     #64748b;
+      --faint:   #e2e8f0;
+      --accent:  #1d4ed8;
+      --red:     #b91c1c;
+      --amber:   #92400e;
+      --green:   #15803d;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
-      height: 100%;
-    }
+    html, body { height: 100%; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', sans-serif;
@@ -32,7 +30,7 @@
       min-height: 100dvh;
     }
 
-    /* ── Header ─────────────────────────────────────────────────────── */
+    /* ── Header ──────────────────────────────────────────────────── */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--faint);
@@ -43,16 +41,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 24px 12px;
+      padding: 14px 24px;
       gap: 16px;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      min-width: 0;
-    }
+    .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
 
     #brand-logo {
       height: 44px;
@@ -62,7 +55,7 @@
     }
 
     #brand-icon {
-      font-size: 28px;
+      font-size: 32px;
       line-height: 1;
       display: none;
     }
@@ -78,7 +71,7 @@
     .header-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-shrink: 0;
     }
 
@@ -89,143 +82,107 @@
     }
 
     #loading-dot {
-      width: 7px;
-      height: 7px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: var(--accent);
       display: none;
       animation: blink 1s ease-in-out infinite;
     }
 
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
 
     .btn-refresh {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--sub);
-      padding: 6px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
+      background: none; border: none; cursor: pointer;
+      color: var(--sub); padding: 6px; border-radius: 8px;
+      display: flex; align-items: center;
       transition: color .15s, background .15s;
     }
-
-    .btn-refresh:hover {
-      color: var(--accent);
-      background: #f0f4ff;
-    }
-
+    .btn-refresh:hover { color: var(--accent); background: #eff6ff; }
     .btn-refresh svg { width: 15px; height: 15px; }
 
-    /* ── Tabs ───────────────────────────────────────────────────────── */
-    .tab-bar {
-      display: flex;
-      padding: 0 24px;
-      gap: 0;
-    }
+    /* ── Tabs ────────────────────────────────────────────────────── */
+    .tab-bar { display: flex; padding: 0 24px; }
 
     .tab {
-      padding: 10px 20px;
-      font-size: 13px;
-      font-weight: 500;
+      padding: 10px 18px;
+      font-size: 13px; font-weight: 500;
       color: var(--sub);
-      background: none;
-      border: none;
+      background: none; border: none;
       border-bottom: 2px solid transparent;
       margin-bottom: -1px;
       cursor: pointer;
       letter-spacing: .01em;
       transition: color .15s, border-color .15s;
     }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    .tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-
-    /* ── Main grid ──────────────────────────────────────────────────── */
+    /* ── Main grid ───────────────────────────────────────────────── */
     main {
       flex: 1;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1px;
-      background: var(--faint);
-      overflow: hidden;
+      gap: 16px;
+      padding: 20px;
+      align-items: start;
     }
 
-    /* mobile: stack */
-    @media (max-width: 600px) {
+    @media (max-width: 620px) {
       main {
         grid-template-columns: 1fr;
-        overflow-y: auto;
-        background: var(--bg);
-        gap: 12px;
-        padding: 12px;
+        padding: 14px;
+        gap: 14px;
       }
     }
 
-    /* ── Route panel ────────────────────────────────────────────────── */
-    .route-panel {
+    /* ── Route card ──────────────────────────────────────────────── */
+    .route-card {
       background: var(--surface);
-      display: flex;
-      flex-direction: column;
+      border-radius: 16px;
       overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
     }
 
-    @media (max-width: 600px) {
-      .route-panel {
-        border-radius: 12px;
-        border: 1px solid var(--faint);
-      }
-    }
-
-    .route-title {
-      padding: 18px 28px 12px;
+    /* ── Route header ────────────────────────────────────────────── */
+    .route-header {
+      padding: 20px 24px 16px;
       border-bottom: 1px solid var(--faint);
     }
 
     .route-from {
-      font-size: 13px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--text);
-      letter-spacing: .01em;
+      letter-spacing: -.2px;
+      line-height: 1.1;
+    }
+
+    .route-arrow {
+      display: inline-block;
+      color: var(--faint);
+      margin: 6px 0 3px;
+      font-size: 13px;
     }
 
     .route-to {
-      font-size: 13px;
+      font-size: 16px;
+      font-weight: 500;
       color: var(--sub);
-      margin-top: 2px;
+      letter-spacing: -.1px;
     }
 
-    .route-to::before {
-      content: '→  ';
-      color: var(--faint);
-      font-size: 11px;
-    }
-
-    /* ── Connection rows ────────────────────────────────────────────── */
-    .conn-list {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
+    /* ── Connection rows ─────────────────────────────────────────── */
     .conn-row {
-      flex: 1;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--faint);
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      padding: 0 28px;
-      border-bottom: 1px solid var(--faint);
-      min-height: 0;
+      gap: 7px;
     }
-
     .conn-row:last-child { border-bottom: none; }
 
-    .conn-main {
+    .conn-top {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
       gap: 12px;
     }
@@ -233,11 +190,11 @@
     .times {
       display: flex;
       align-items: baseline;
-      gap: 8px;
+      gap: 6px;
     }
 
     .dep {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 300;
       font-variant-numeric: tabular-nums;
       letter-spacing: -.5px;
@@ -245,14 +202,14 @@
       line-height: 1;
     }
 
-    .dep.delayed {
+    .dep.striked {
+      font-size: 22px;
       text-decoration: line-through;
       color: var(--sub);
-      font-size: 20px;
     }
 
-    .dep-actual {
-      font-size: 26px;
+    .dep-new {
+      font-size: 28px;
       font-weight: 300;
       font-variant-numeric: tabular-nums;
       letter-spacing: -.5px;
@@ -260,14 +217,10 @@
       line-height: 1;
     }
 
-    .sep {
-      font-size: 14px;
-      color: var(--faint);
-      font-weight: 300;
-    }
+    .sep { font-size: 14px; color: #cbd5e1; }
 
     .arr {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 300;
       font-variant-numeric: tabular-nums;
       letter-spacing: -.3px;
@@ -276,32 +229,29 @@
     }
 
     .countdown {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
-      letter-spacing: .01em;
       flex-shrink: 0;
       line-height: 1;
     }
-
-    .countdown.now    { color: var(--red); font-size: 15px; }
+    .countdown.now    { color: var(--red); font-size: 16px; }
     .countdown.soon   { color: var(--amber); }
     .countdown.normal { color: var(--green); }
-    .countdown.future { color: var(--sub); font-weight: 400; }
+    .countdown.future { color: var(--sub); font-weight: 400; font-size: 13px; }
 
-    .conn-sub {
+    .conn-meta {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-top: 6px;
+      gap: 8px;
     }
 
     .line-pill {
       font-size: 11px;
       font-weight: 700;
       letter-spacing: .04em;
-      background: #e8f0fd;
-      color: var(--accent);
-      padding: 2px 8px;
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 3px 9px;
       border-radius: 20px;
     }
 
@@ -312,28 +262,22 @@
 
     .delay-tag {
       font-size: 12px;
+      font-weight: 600;
       color: var(--red);
     }
 
-    /* ── Skeleton ───────────────────────────────────────────────────── */
+    /* ── Skeleton ────────────────────────────────────────────────── */
     .skel {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      border-radius: 6px;
+      background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
       background-size: 200% 100%;
-      animation: sweep 1.4s infinite;
-      border-radius: 4px;
-      height: 24px;
+      animation: sweep 1.5s infinite;
     }
+    @keyframes sweep { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-    @keyframes sweep {
-      0%   { background-position: 200% 0 }
-      100% { background-position: -200% 0 }
-    }
-
-    .skel-sm { height: 12px; margin-top: 8px; width: 80px; }
-
-    /* ── Error ──────────────────────────────────────────────────────── */
-    .error-msg {
-      padding: 28px;
+    /* ── Error ───────────────────────────────────────────────────── */
+    .error-row {
+      padding: 20px 24px;
       font-size: 13px;
       color: var(--red);
     }
@@ -361,7 +305,6 @@
       </button>
     </div>
   </div>
-
   <div class="tab-bar">
     <button class="tab active" id="tab-arbeit" onclick="setTab('arbeit')">Zur Arbeit</button>
     <button class="tab"        id="tab-heim"   onclick="setTab('heim')">Nach Hause</button>
@@ -372,7 +315,6 @@
 
 <script>
 const API = 'https://transport.opendata.ch/v1/connections';
-const KC  = 'https://raw.githubusercontent.com/darioomartig/Kc/main/kc%20lange.jpg';
 
 const ROUTES = {
   arbeit: [
@@ -380,29 +322,22 @@ const ROUTES = {
     { from: 'Liebefeld, Neuhausplatz',   to: 'Bern, Kocherpark' },
   ],
   heim: [
-    { from: 'Bern, Hirschengraben',     to: 'Liebefeld, Neuhausplatz' },
-    { from: 'Bern, Monbijou',           to: 'Liebefeld, Liebefeld Park' },
+    { from: 'Bern, Hirschengraben',  to: 'Liebefeld, Neuhausplatz' },
+    { from: 'Bern, Monbijou',        to: 'Liebefeld, Liebefeld Park' },
   ],
 };
 
-let tab    = 'arbeit';
-let cache  = { arbeit: null, heim: null };
-let nowMs  = Date.now();
+let tab   = 'arbeit';
+let cache = { arbeit: null, heim: null };
+let nowMs = Date.now();
 
-// ── Brand ──────────────────────────────────────────────────────────────────
 function applyBrand(t) {
   const logo = document.getElementById('brand-logo');
   const icon = document.getElementById('brand-icon');
-  if (t === 'arbeit') {
-    logo.style.display = 'block';
-    icon.style.display = 'none';
-  } else {
-    logo.style.display = 'none';
-    icon.style.display = 'block';
-  }
+  logo.style.display = t === 'arbeit' ? 'block' : 'none';
+  icon.style.display = t === 'heim'   ? 'block' : 'none';
 }
 
-// ── Tab ────────────────────────────────────────────────────────────────────
 function setTab(t) {
   tab = t;
   document.getElementById('tab-arbeit').classList.toggle('active', t === 'arbeit');
@@ -411,7 +346,6 @@ function setTab(t) {
   cache[t] ? render(cache[t]) : (skeleton(), doRefresh());
 }
 
-// ── Fetch ──────────────────────────────────────────────────────────────────
 async function fetchRoute(from, to) {
   const r = await fetch(`${API}?${new URLSearchParams({ from, to, limit: 4 })}`);
   if (!r.ok) throw new Error(r.status);
@@ -428,7 +362,7 @@ async function doRefresh() {
   } catch {
     document.getElementById('main').innerHTML =
       ROUTES[tab].map(() =>
-        `<div class="route-panel"><div class="error-msg">Fehler beim Laden.</div></div>`
+        `<div class="route-card"><div class="error-row">Fehler beim Laden.</div></div>`
       ).join('');
   }
   loading(false);
@@ -438,7 +372,6 @@ function loading(on) {
   document.getElementById('loading-dot').style.display = on ? 'block' : 'none';
 }
 
-// ── Time helpers ───────────────────────────────────────────────────────────
 const fmt = iso => iso
   ? new Date(iso).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' })
   : '--:--';
@@ -464,7 +397,7 @@ function parseDur(d) {
   const m = d.match(/(\d+)d(\d+):(\d+):/);
   if (!m) return d;
   const tot = +m[1]*1440 + +m[2]*60 + +m[3];
-  return tot < 60 ? `${tot} min` : `${Math.floor(tot/60)} h ${tot%60 ? tot%60+' min' : ''}`;
+  return tot < 60 ? `${tot} min` : `${Math.floor(tot/60)}h ${tot%60 ? tot%60+' min' : ''}`;
 }
 
 function delayMin(c) {
@@ -472,36 +405,31 @@ function delayMin(c) {
   return d ? (d >= 60 ? Math.round(d/60) : d) : 0;
 }
 
-// ── Render ─────────────────────────────────────────────────────────────────
-function routeLabel(r) {
-  const short = s => s.replace('Liebefeld, ', '').replace('Bern, ', '');
-  return { from: short(r.from), to: short(r.to) };
-}
+const shortName = s => s.replace('Liebefeld, ', '').replace('Bern, ', '');
 
 function connHtml(c) {
-  const delay    = delayMin(c);
-  const depSched = fmt(c.from?.departure);
-  const depReal  = delay > 0 ? fmt(effDep(c)) : null;
-  const arr      = fmt(c.to?.arrival);
-  const line     = (c.products || [])[0] || '';
-  const dur      = parseDur(c.duration);
+  const delay   = delayMin(c);
+  const dep     = fmt(c.from?.departure);
+  const depReal = delay > 0 ? fmt(effDep(c)) : null;
+  const arr     = fmt(c.to?.arrival);
+  const line    = (c.products || [])[0] || '';
+  const dur     = parseDur(c.duration);
 
-  const depHtml = depReal
-    ? `<span class="dep delayed">${depSched}</span>
-       <span class="dep-actual">${depReal}</span>`
-    : `<span class="dep">${depSched}</span>`;
+  const depPart = depReal
+    ? `<span class="dep striked">${dep}</span><span class="dep-new">${depReal}</span>`
+    : `<span class="dep">${dep}</span>`;
 
   return `
     <div class="conn-row">
-      <div class="conn-main">
+      <div class="conn-top">
         <div class="times">
-          ${depHtml}
+          ${depPart}
           <span class="sep">→</span>
           <span class="arr">${arr}</span>
         </div>
         ${countdownHtml(c)}
       </div>
-      <div class="conn-sub">
+      <div class="conn-meta">
         ${line ? `<span class="line-pill">${line}</span>` : ''}
         <span class="dur">${dur}</span>
         ${delay > 0 ? `<span class="delay-tag">+${delay} min</span>` : ''}
@@ -511,49 +439,44 @@ function connHtml(c) {
 
 function render(data) {
   document.getElementById('main').innerHTML = ROUTES[tab].map((r, i) => {
-    const lbl  = routeLabel(r);
+    const from = shortName(r.from);
+    const to   = shortName(r.to);
     const rows = (data[i] || []).map(connHtml).join('') ||
-      `<div class="conn-row"><span style="color:var(--sub);font-size:13px">Keine Verbindungen</span></div>`;
+      `<div class="error-row" style="color:var(--sub)">Keine Verbindungen</div>`;
     return `
-      <div class="route-panel">
-        <div class="route-title">
-          <div class="route-from">${lbl.from}</div>
-          <div class="route-to">${lbl.to}</div>
+      <div class="route-card">
+        <div class="route-header">
+          <div class="route-from">${from}</div>
+          <div class="route-arrow">↓</div>
+          <div class="route-to">${to}</div>
         </div>
-        <div class="conn-list">${rows}</div>
+        ${rows}
       </div>`;
   }).join('');
 }
 
 function skeleton() {
   document.getElementById('main').innerHTML = ROUTES[tab].map((r) => {
-    const lbl = routeLabel(r);
+    const rows = [0,0,0,0].map(() => `
+      <div class="conn-row">
+        <div class="skel" style="width:190px;height:28px"></div>
+        <div class="skel" style="width:90px;height:12px;margin-top:4px"></div>
+      </div>`).join('');
     return `
-      <div class="route-panel">
-        <div class="route-title">
-          <div class="route-from">${lbl.from}</div>
-          <div class="route-to">${lbl.to}</div>
+      <div class="route-card">
+        <div class="route-header">
+          <div class="route-from">${shortName(r.from)}</div>
+          <div class="route-arrow">↓</div>
+          <div class="route-to">${shortName(r.to)}</div>
         </div>
-        <div class="conn-list">
-          ${[0,0,0,0].map(() => `
-            <div class="conn-row">
-              <div class="skel" style="width:180px"></div>
-              <div class="skel skel-sm"></div>
-            </div>`).join('')}
-        </div>
+        ${rows}
       </div>`;
   }).join('');
 }
 
-// ── Clock ──────────────────────────────────────────────────────────────────
-setInterval(() => {
-  nowMs = Date.now();
-  if (cache[tab]) render(cache[tab]);
-}, 1000);
-
+setInterval(() => { nowMs = Date.now(); if (cache[tab]) render(cache[tab]); }, 1000);
 setInterval(doRefresh, 60_000);
 
-// ── Boot ───────────────────────────────────────────────────────────────────
 applyBrand('arbeit');
 skeleton();
 doRefresh();
