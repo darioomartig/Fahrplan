@@ -308,6 +308,7 @@
   <div class="tab-bar">
     <button class="tab active" id="tab-arbeit" onclick="setTab('arbeit')">Zur Arbeit</button>
     <button class="tab"        id="tab-heim"   onclick="setTab('heim')">Nach Hause</button>
+    <button class="tab"        id="tab-prah"   onclick="setTab('prah')">Zu Prah</button>
   </div>
 </header>
 
@@ -325,23 +326,29 @@ const ROUTES = {
     { from: 'Bern, Hirschengraben',  to: 'Liebefeld, Neuhausplatz' },
     { from: 'Bern, Monbijou',        to: 'Liebefeld, Liebefeld Park' },
   ],
+  prah: [
+    { from: 'Liebefeld, Neuhausplatz',   to: 'Bern, Engeried' },
+    { from: 'Liebefeld, Liebefeld Park', to: 'Bern, Engeried' },
+  ],
 };
 
 let tab   = 'arbeit';
-let cache = { arbeit: null, heim: null };
+let cache = { arbeit: null, heim: null, prah: null };
 let nowMs = Date.now();
 
 function applyBrand(t) {
   const logo = document.getElementById('brand-logo');
   const icon = document.getElementById('brand-icon');
   logo.style.display = t === 'arbeit' ? 'block' : 'none';
-  icon.style.display = t === 'heim'   ? 'block' : 'none';
+  icon.style.display = t !== 'arbeit' ? 'block' : 'none';
+  document.getElementById('brand-icon').textContent = t === 'heim' ? '🏠' : '🚶';
 }
 
 function setTab(t) {
   tab = t;
-  document.getElementById('tab-arbeit').classList.toggle('active', t === 'arbeit');
-  document.getElementById('tab-heim').classList.toggle('active', t === 'heim');
+  ['arbeit','heim','prah'].forEach(id =>
+    document.getElementById('tab-'+id).classList.toggle('active', t === id)
+  );
   applyBrand(t);
   cache[t] ? render(cache[t]) : (skeleton(), doRefresh());
 }
