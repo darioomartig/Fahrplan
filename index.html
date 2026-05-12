@@ -239,10 +239,12 @@
     .countdown.normal { color: var(--green); }
     .countdown.future { color: var(--sub); font-weight: 400; font-size: 13px; }
 
+    /* ── Meta row (single leg) ───────────────────────────────────── */
     .conn-meta {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .line-pill {
@@ -255,6 +257,16 @@
       border-radius: 20px;
     }
 
+    .kante-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--sub);
+      background: var(--faint);
+      padding: 3px 9px;
+      border-radius: 20px;
+      letter-spacing: .03em;
+    }
+
     .dur {
       font-size: 12px;
       color: var(--sub);
@@ -264,6 +276,62 @@
       font-size: 12px;
       font-weight: 600;
       color: var(--red);
+    }
+
+    /* ── Multi-leg display ───────────────────────────────────────── */
+    .legs {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .leg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 0 6px;
+      border-top: 1px solid var(--faint);
+    }
+    .leg:first-child { border-top: none; padding-top: 2px; }
+
+    .leg-times {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .leg-dep {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .leg-sep { font-size: 12px; color: #cbd5e1; }
+
+    .leg-arr {
+      font-size: 14px;
+      color: var(--sub);
+    }
+
+    .leg-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .leg-route {
+      font-size: 11px;
+      color: var(--sub);
+    }
+
+    .transfer-sep {
+      font-size: 11px;
+      color: var(--sub);
+      letter-spacing: .02em;
+      padding: 2px 0 0;
+      opacity: .7;
     }
 
     /* ── Skeleton ────────────────────────────────────────────────── */
@@ -319,8 +387,8 @@ const API = 'https://transport.opendata.ch/v1/connections';
 
 const ROUTES = {
   arbeit: [
-    { from: 'Liebefeld, Liebefeld Park', to: 'Bern, Monbijou' },
     { from: 'Liebefeld, Neuhausplatz',   to: 'Bern, Kocherpark' },
+    { from: 'Liebefeld, Liebefeld Park', to: 'Bern, Monbijou' },
   ],
   heim: [
     { from: 'Bern, Hirschengraben',  to: 'Liebefeld, Neuhausplatz' },
@@ -412,19 +480,80 @@ function delayMin(c) {
   return d ? (d >= 60 ? Math.round(d/60) : d) : 0;
 }
 
-const shortName = s => s.replace('Liebefeld, ', '').replace('Bern, ', '');
+const shortName = s => (s || '').replace('Liebefeld, ', '').replace('Bern, ', '');
+
+function catLabel(cat) {
+  if (!cat) return '';
+  if (cat === 'B') return 'Bus';
+  if (cat === 'T') return 'Tram';
+  if (cat === 'S') return 'S-Bahn';
+  return cat;
+}
+
+function lineName(sec) {
+  const cat = sec.journey?.category || '';
+  const num = sec.journey?.number || '';
+  if (!cat && !num) return '';
+  return `${catLabel(cat)} ${num}`.trim();
+}
 
 function connHtml(c) {
   const delay   = delayMin(c);
   const dep     = fmt(c.from?.departure);
   const depReal = delay > 0 ? fmt(effDep(c)) : null;
   const arr     = fmt(c.to?.arrival);
-  const line    = (c.products || [])[0] || '';
   const dur     = parseDur(c.duration);
 
   const depPart = depReal
     ? `<span class="dep striked">${dep}</span><span class="dep-new">${depReal}</span>`
     : `<span class="dep">${dep}</span>`;
+
+  // Journey sections only (skip walk/transfer placeholders)
+  const secs = (c.sections || []).filter(s => s.journey);
+
+  let bodyHtml;
+  if (secs.length <= 1) {
+    const sec   = secs[0];
+    const line  = sec ? lineName(sec) : (c.products || [])[0] || '';
+    const kante = sec?.departure?.platform;
+    bodyHtml = `
+      <div class="conn-meta">
+        ${line  ? `<span class="line-pill">${line}</span>` : ''}
+        ${kante ? `<span class="kante-tag">Kante ${kante}</span>` : ''}
+        <span class="dur">${dur}</span>
+        ${delay > 0 ? `<span class="delay-tag">+${delay} min</span>` : ''}
+      </div>`;
+  } else {
+    const legItems = secs.map((sec, i) => {
+      const line     = lineName(sec);
+      const kante    = sec.departure?.platform;
+      const fromName = shortName(sec.departure?.station?.name || '');
+      const toName   = shortName(sec.arrival?.station?.name || '');
+      const depTime  = fmt(sec.departure?.departure);
+      const arrTime  = fmt(sec.arrival?.arrival);
+      const isLast   = i === secs.length - 1;
+      return `
+        <div class="leg">
+          <div class="leg-times">
+            <span class="leg-dep">${depTime}</span>
+            <span class="leg-sep">→</span>
+            <span class="leg-arr">${arrTime}</span>
+          </div>
+          <div class="leg-info">
+            ${line  ? `<span class="line-pill">${line}</span>` : ''}
+            ${kante ? `<span class="kante-tag">Kante ${kante}</span>` : ''}
+            <span class="leg-route">${fromName} → ${toName}</span>
+          </div>
+        </div>
+        ${!isLast ? `<div class="transfer-sep">Umsteigen</div>` : ''}`;
+    }).join('');
+    bodyHtml = `
+      <div class="legs">${legItems}</div>
+      <div class="conn-meta">
+        <span class="dur">${dur} gesamt</span>
+        ${delay > 0 ? `<span class="delay-tag">+${delay} min</span>` : ''}
+      </div>`;
+  }
 
   return `
     <div class="conn-row">
@@ -436,11 +565,7 @@ function connHtml(c) {
         </div>
         ${countdownHtml(c)}
       </div>
-      <div class="conn-meta">
-        ${line ? `<span class="line-pill">${line}</span>` : ''}
-        <span class="dur">${dur}</span>
-        ${delay > 0 ? `<span class="delay-tag">+${delay} min</span>` : ''}
-      </div>
+      ${bodyHtml}
     </div>`;
 }
 
